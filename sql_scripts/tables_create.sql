@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS Courses (
-    chapter_name VARCHAR NOT NULL DEFAULT 'PC00',
+    chapter_id VARCHAR NOT NULL DEFAULT 'PC00',
     chapter_text VARCHAR DEFAULT '../chapter/PC00',
 	chapter_complexity VARCHAR DEFAULT 'easy' CHECK (chapter_complexity IN ('easy', 'medium', 'hard', 'extra')),
 	chapter_award INT DEFAULT 42,
@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS Courses (
 
 
 CREATE TABLE IF NOT EXISTS InterviewTasks (
-    task_name VARCHAR NOT NULL DEFAULT 'PIT00',
+    task_id VARCHAR NOT NULL DEFAULT 'PIT00',
     task_text VARCHAR DEFAULT '../interview_tasks/PT00',
     task_complexity VARCHAR DEFAULT 'easy' CHECK (task_complexity IN ('easy', 'medium', 'hard', 'extra')),
 	task_award INT DEFAULT 21,
@@ -16,8 +16,8 @@ CREATE TABLE IF NOT EXISTS InterviewTasks (
 );
 
 
-CREATE TABLE Notebooks (
-    notebook_name VARCHAR NOT NULL DEFAULT 'PN00',
+CREATE TABLE IF NOT EXISTS Notebooks (
+    notebook_id VARCHAR NOT NULL DEFAULT 'PN00',
     notebook_text VARCHAR DEFAULT '../notebooks/PN00',
     notebook_complexity VARCHAR DEFAULT 'easy' CHECK (notebook_complexity IN ('easy', 'medium', 'hard', 'extra')),
     notebook_award INT DEFAULT 21,
@@ -26,16 +26,16 @@ CREATE TABLE Notebooks (
 
 
 CREATE TABLE IF NOT EXISTS Store (
-    name VARCHAR NOT NULL PRIMARY KEY,
-	type VARCHAR DEFAULT 'consumable',
-    description VARCHAR DEFAULT ' ',
-    price INT DEFAULT 21,
-    bought_once INT DEFAULT 0
+    item_name VARCHAR NOT NULL PRIMARY KEY,
+	item_type VARCHAR DEFAULT 'consumable',
+    item_description VARCHAR DEFAULT ' ',
+    item_price INT DEFAULT 21,
+    item_bought_once INT DEFAULT 0
 );
 
 
 CREATE TABLE IF NOT EXISTS Stat (
-    total_users INT NOT NULL DEFAULT 0,
+    total_users INT DEFAULT 0,
     correct_answer_stat FLOAT DEFAULT 0,
     total_solved_common INT DEFAULT 0,
     total_solved_hard INT DEFAULT 0,
@@ -50,15 +50,19 @@ CREATE TABLE IF NOT EXISTS Stat (
 );
 
 
-CREATE TABLE Users (
-    user_chat_id SERIAL PRIMARY KEY,
-    step_id CHAR(4) DEFAULT 'PC00',
-    money INT DEFAULT 21,
-    consumables INT[] DEFAULT ARRAY[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-    total_tasks INT DEFAULT 0,
-    maximum_series INT DEFAULT 0,
-    register_day TIMESTAMP DEFAULT CURRENT_DATE,
-    level INT DEFAULT 1,
-    status VARCHAR DEFAULT 'novice pythonist',
-    achievements INT[] DEFAULT ARRAY[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+CREATE TABLE IF NOT EXISTS Users (
+    user_name VARCHAR NOT NULL,
+    user_chat_id BIGINT NOT NULL PRIMARY KEY,
+    user_chapter_id CHAR(4) DEFAULT 'PC00',
+    user_task_id CHAR(5) DEFAULT 'PIT00',
+    user_notebook_id CHAR(4) DEFAULT 'PN00',
+    user_money INT DEFAULT 21,
+    user_consumables INT[] DEFAULT ARRAY[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    user_total_tasks INT DEFAULT 0,
+    user_maximum_series INT DEFAULT 0,
+    user_register_day TIMESTAMP DEFAULT CURRENT_DATE,
+    user_level INT DEFAULT 1,
+    user_exp INT DEFAULT 0,
+    user_status VARCHAR DEFAULT 'novice pythonist',
+    user_achievements INT[] DEFAULT ARRAY[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 );
