@@ -25,7 +25,17 @@ class PythonMummyBot:
         def send_start_message(message: telebot.types.Message) -> None:
             user_chat_id: int = message.from_user.id
             user_profile_name: str = message.from_user.username
-            is_user: bool = self.db_connect.check_user(user)
+
+            is_user: bool = self.db_connect.check_user(user_chat_id=user_chat_id)
+            if is_user:
+                self.__bot.send_message(user_chat_id, text="Ты уже зарегистрирован в PythonMummy. "
+                                                           "Тебе уже доступны все привилегии нашего бота :)")
+            else:
+                self.__bot.send_message(user_chat_id,
+                                        text="Укажи имя твоего аватара. Имя должно соответствовать следующим "
+                                             "параметрам: длина от 4 до 32-х символов включительно, имя состоит "
+                                             "только из латинских букв, имя должно быть уникальным")
+                self.__bot.register_next_step_handler(message, self.add_user_avatar)
 
         @self.__bot.message_handler(commands=["pic"])
         def send_pic(message: telebot.types.Message) -> None:
@@ -64,6 +74,8 @@ class PythonMummyBot:
         @self.__bot.message_handler(commands=["top"])
         def get_leaderboard(message: telebot.types.Message) -> None:
             user_chat_id: int = message.from_user.id
+            user_avatar: str = self.db_connect.get_user_avatar(user_chat_id=user_chat_id)[0]
+
             res: list = list(self.db_connect.get_top_users())
             top_users: list[str] = [f"{t[0]} {t[1]} lvl with {t[2]} exp" for t in res]
 
@@ -72,7 +84,7 @@ class PythonMummyBot:
 
             self.__bot.send_message(user_chat_id, text=top_users_message)
 
-            if message.from_user.username in top_users_message:
+            if user_avatar in top_users_message:
                 self.__bot.send_message(user_chat_id, text="Поздравляем! Ты уверенно входишь в топ-10 пользователей🎉 "
                                                            "\nПо окончанию гонки ты получишь приятный приз :)")
             else:
@@ -134,6 +146,21 @@ class PythonMummyBot:
     def clear_text_threshold(self):
         self.text_threshold = ""
         return
+
+    def add_user_avatar(self, message: telebot.types.Message) -> None:
+        user_avatar: str = message.text.strip()
+        user_chat_id: int = message.from_user.id
+        user_name: str = message.from_user.username
+
+        if (self.static_service.validate_name(name=user_avatar)
+                and not self.db_connect.check_avatar(user_avatar=user_avatar)):
+            self.db_connect.add_user(user_chat_id=user_chat_id, user_name=user_name, user_avatar=user_avatar)
+            self.__bot.send_message(user_chat_id, text="Теперь ты являешься одним из последователей PythonMummy!")
+
+        else:
+            self.__bot.send_message(user_chat_id, text="К сожалению, вы указали имя, которое не соответствует "
+                                                       "параметрам, либо такое имя уже занято. Повтори операцию "
+                                                       "регистрации снова через команду /start")
 
     def run(self) -> None:
         self.__bot.polling()

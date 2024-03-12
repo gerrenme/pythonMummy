@@ -8,7 +8,7 @@ class DatabaseCaller:
                                                                password=db_password, database=db_name)
         self.__connection.autocommit = True
 
-    def check_user(self, user_chat_id: int) -> bool:
+    def check_user(self, user_chat_id: int) -> bool:  # 1 если есть, 0 если нет
         with self.__connection.cursor() as cursor:
             cursor.execute(f"SELECT * "
                            f"FROM Users AS us "
@@ -16,12 +16,28 @@ class DatabaseCaller:
             result: list[tuple] = cursor.fetchone()
             return not (result is None)
 
-    def add_user(self, user_chat_id: int, user_name: str, user_profile_name: str) -> bool:
+    def check_avatar(self, user_avatar: str) -> bool:  # 1 если есть, 0 если нет
+        with self.__connection.cursor() as cursor:
+            cursor.execute(f"SELECT * "
+                           f"FROM Users AS us "
+                           f"WHERE us.user_avatar = '{user_avatar}'; ")
+            result: list[tuple] = cursor.fetchone()
+            return not (result is None)
+
+    def get_user_avatar(self, user_chat_id: int) -> tuple:
+        with self.__connection.cursor() as cursor:
+            cursor.execute(f"SELECT us.user_avatar "
+                           f"FROM Users AS us "
+                           f"WHERE us.user_chat_id = {user_chat_id}; ")
+
+            return cursor.fetchone()
+
+    def add_user(self, user_chat_id: int, user_name: str, user_avatar: str) -> bool:
         is_user: bool = self.check_user(user_chat_id=user_chat_id)
         if not is_user:
             with self.__connection.cursor() as cursor:
-                cursor.execute(f"INSERT INTO Users(user_name, user_chat_id) "
-                               f"VALUES('{user_name}', {user_chat_id}); ")
+                cursor.execute(f"INSERT INTO Users(user_name, user_chat_id, user_avatar) "
+                               f"VALUES('{user_name}', {user_chat_id}, '{user_avatar}'); ")
                 return True
 
         return False
@@ -42,7 +58,7 @@ class DatabaseCaller:
 
     def get_top_users(self) -> tuple:
         with self.__connection.cursor() as cursor:
-            cursor.execute(f"SELECT us.user_name, us.user_level, us.user_exp "
+            cursor.execute(f"SELECT us.user_avatar, us.user_level, us.user_exp "
                            f"FROM Users AS us "
                            f"ORDER BY us.user_exp DESC "
                            f"LIMIT 10; ")
