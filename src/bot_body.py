@@ -1,16 +1,11 @@
 import telebot
-import pandas as pd
-import numpy as np
 import os
 
 from database_calls import DatabaseCaller
 from message_creator import MessageCreator
 from static_service import StaticSrvice
 
-from datetime import datetime
-from random import choice
 from config import telebot_key
-import threading
 
 
 class PythonMummyBot:
@@ -19,12 +14,10 @@ class PythonMummyBot:
         self.db_connect: DatabaseCaller = DatabaseCaller()
         self.message_creator: MessageCreator = MessageCreator()
         self.static_service: StaticSrvice = StaticSrvice()
-        self.text_threshold: str = ""
 
         @self.__bot.message_handler(commands=["start"])
         def send_start_message(message: telebot.types.Message) -> None:
             user_chat_id: int = message.from_user.id
-            user_profile_name: str = message.from_user.username
 
             is_user: bool = self.db_connect.check_user(user_chat_id=user_chat_id)
             if is_user:
@@ -93,6 +86,9 @@ class PythonMummyBot:
             return
 
         @self.__bot.message_handler(commands=["store"])
+        def
+
+        @self.__bot.message_handler(commands=["store"])
         def get_store_data(message: telebot.types.Message) -> None:
             user_chat_id: int = message.from_user.id
             store_link: str = "https://disk.yandex.ru/i/gRVYI2aP60fTuw"
@@ -115,22 +111,13 @@ class PythonMummyBot:
 
             return
 
-        # TODO. Разобраться, почему сообщение отсылается 2 раза
         @self.__bot.message_handler(commands=["suggest"])
-        def send_suggestion(message: telebot.types.Message) -> None:
-            user_name: str = message.from_user.username
+        def create_suggestion(message: telebot.types.Message) -> None:
             user_chat_id: int = message.from_user.id
 
             self.__bot.send_message(user_chat_id, text="Введите ваше предложение по улучшению PythonMummy")
-            self.__bot.register_next_step_handler(message, get_user_text)
-            print("registered")
+            self.__bot.register_next_step_handler(message, add_suggestion)
 
-            if self.text_threshold:
-                print("entered")
-                self.db_connect.add_suggestion(user_name=user_name, user_suggestion=self.text_threshold)
-                self.__bot.send_message(user_chat_id, text="Предложение успешно добавлено! Спасибо за помощь!")
-
-            self.clear_text_threshold()
             return
 
         @self.__bot.message_handler(content_types=["text"])
@@ -138,14 +125,15 @@ class PythonMummyBot:
             self.__bot.send_message(message.from_user.id, text="crigne text given")
             return
 
-        def get_user_text(message: telebot.types.Message) -> str:
-            text: str = message.text
-            self.text_threshold = text
-            return text
+        def add_suggestion(message: telebot.types.Message) -> None:
+            user_chat_id: int = message.from_user.id
+            user_avatar: str = self.db_connect.get_user_avatar(user_chat_id=user_chat_id)[0]
+            user_suggestion: str = message.text.strip().lower()
 
-    def clear_text_threshold(self):
-        self.text_threshold = ""
-        return
+            self.db_connect.add_suggestion(user_avatar=user_avatar, user_suggestion=user_suggestion)
+            self.__bot.send_message(user_chat_id, text="Предложение успешно добавлено! Спасибо за помощь!")
+
+            return
 
     def add_user_avatar(self, message: telebot.types.Message) -> None:
         user_avatar: str = message.text.strip()

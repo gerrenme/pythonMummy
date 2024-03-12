@@ -65,10 +65,10 @@ class DatabaseCaller:
 
             return cursor.fetchall()
 
-    def add_suggestion(self, user_name: str, user_suggestion) -> None:
+    def add_suggestion(self, user_avatar: str, user_suggestion) -> None:
         with self.__connection.cursor() as cursor:
             cursor.execute(f"INSERT INTO Suggestions(user_name, suggestion)"
-                           f"VALUES('{user_name}', '{user_suggestion}'); ")
+                           f"VALUES('{user_avatar}', '{user_suggestion}'); ")
 
             return
 
