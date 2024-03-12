@@ -24,15 +24,8 @@ class PythonMummyBot:
         @self.__bot.message_handler(commands=["start"])
         def send_start_message(message: telebot.types.Message) -> None:
             user_chat_id: int = message.from_user.id
-            user_name: str = message.from_user.username
-            res: bool = self.db_connect.add_user(user_chat_id=user_chat_id, user_name=user_name)
-
-            if res:
-                self.__bot.send_message(user_chat_id, text="register success")
-            else:
-                self.__bot.send_message(user_chat_id, text="decline register")
-
-            return
+            user_profile_name: str = message.from_user.username
+            is_user: bool = self.db_connect.check_user(user)
 
         @self.__bot.message_handler(commands=["pic"])
         def send_pic(message: telebot.types.Message) -> None:
@@ -87,16 +80,43 @@ class PythonMummyBot:
                                                            "тебя все впереди! Мы верим в тебя!")
             return
 
+        @self.__bot.message_handler(commands=["store"])
+        def get_store_data(message: telebot.types.Message) -> None:
+            user_chat_id: int = message.from_user.id
+            store_link: str = "https://disk.yandex.ru/i/gRVYI2aP60fTuw"
+            self.__bot.send_message(user_chat_id, text=f"Наш магазин предоставляет широкий ассортимент, ознакомиться "
+                                                       f"с которым можно по ссылке {store_link}.")
+
+            return
+
+        # TODO. Прописать хендлер сообщения и зачисление предмета. Также стоит проработать логику хранения снаряжения
+        @self.__bot.message_handler(commands=["buy"])
+        def process_buy_request(message: telebot.types.Message) -> None:
+            user_chat_id: int = message.from_user.id
+            user_balance: int = int(self.db_connect.get_user_balance(user_chat_id=user_chat_id)[0])
+            possible_items: tuple = self.db_connect.get_possible_items(user_balance=user_balance)
+
+            self.__bot.send_message(user_chat_id, text="Ниже приведен список вещей, которые ты можешь купить: \n\n● " +
+                                                       "\n● ".join([f"{t[0]} — {t[1]} Gold" for t in possible_items])
+                                    + f"\n\n Твой баланс {user_balance} Gold. "
+                                      f"Введи название предмета, который хочешь купить")
+
+            return
+
+        # TODO. Разобраться, почему сообщение отсылается 2 раза
         @self.__bot.message_handler(commands=["suggest"])
         def send_suggestion(message: telebot.types.Message) -> None:
             user_name: str = message.from_user.username
             user_chat_id: int = message.from_user.id
 
             self.__bot.send_message(user_chat_id, text="Введите ваше предложение по улучшению PythonMummy")
-            self.__bot.register_next_step_handler(message, self.get_user_text)
+            self.__bot.register_next_step_handler(message, get_user_text)
+            print("registered")
 
             if self.text_threshold:
+                print("entered")
                 self.db_connect.add_suggestion(user_name=user_name, user_suggestion=self.text_threshold)
+                self.__bot.send_message(user_chat_id, text="Предложение успешно добавлено! Спасибо за помощь!")
 
             self.clear_text_threshold()
             return
@@ -106,10 +126,10 @@ class PythonMummyBot:
             self.__bot.send_message(message.from_user.id, text="crigne text given")
             return
 
-    def get_user_text(self, message: telebot.types.Message) -> None:
-        text: str = message.text
-        self.text_threshold = text
-        return
+        def get_user_text(message: telebot.types.Message) -> str:
+            text: str = message.text
+            self.text_threshold = text
+            return text
 
     def clear_text_threshold(self):
         self.text_threshold = ""

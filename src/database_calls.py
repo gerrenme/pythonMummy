@@ -12,16 +12,16 @@ class DatabaseCaller:
         with self.__connection.cursor() as cursor:
             cursor.execute(f"SELECT * "
                            f"FROM Users AS us "
-                           f"WHERE us.user_chat_id = {user_chat_id};")
+                           f"WHERE us.user_chat_id = {user_chat_id}; ")
             result: list[tuple] = cursor.fetchone()
             return not (result is None)
 
-    def add_user(self, user_chat_id: int, user_name: str) -> bool:
+    def add_user(self, user_chat_id: int, user_name: str, user_profile_name: str) -> bool:
         is_user: bool = self.check_user(user_chat_id=user_chat_id)
         if not is_user:
             with self.__connection.cursor() as cursor:
                 cursor.execute(f"INSERT INTO Users(user_name, user_chat_id) "
-                               f"VALUES('{user_name}', {user_chat_id});")
+                               f"VALUES('{user_name}', {user_chat_id}); ")
                 return True
 
         return False
@@ -30,14 +30,14 @@ class DatabaseCaller:
         with self.__connection.cursor() as cursor:
             cursor.execute(f"SELECT us.user_chapter_id, us.user_task_id, us.user_notebook_id "
                            f"FROM Users AS us "
-                           f"WHERE us.user_chat_id = {user_chat_id};")
+                           f"WHERE us.user_chat_id = {user_chat_id}; ")
             return cursor.fetchone()
 
     def get_user_data(self, user_chat_id: int) -> tuple:
         with self.__connection.cursor() as cursor:
             cursor.execute(f"SELECT * "
                            f"FROM Users AS us "
-                           f"WHERE us.user_chat_id = {user_chat_id};")
+                           f"WHERE us.user_chat_id = {user_chat_id}; ")
             return cursor.fetchone()
 
     def get_top_users(self) -> tuple:
@@ -45,15 +45,31 @@ class DatabaseCaller:
             cursor.execute(f"SELECT us.user_name, us.user_level, us.user_exp "
                            f"FROM Users AS us "
                            f"ORDER BY us.user_exp DESC "
-                           f"LIMIT 10;")
+                           f"LIMIT 10; ")
 
             return cursor.fetchall()
 
     def add_suggestion(self, user_name: str, user_suggestion) -> None:
         with self.__connection.cursor() as cursor:
-            cursor.execute(f"INSERT INTO Suggestion(user_name, suggestion)"
-                           f"VALUES({user_name}, {user_suggestion})")
+            cursor.execute(f"INSERT INTO Suggestions(user_name, suggestion)"
+                           f"VALUES('{user_name}', '{user_suggestion}'); ")
 
             return
+
+    def get_user_balance(self, user_chat_id: int) -> tuple:
+        with self.__connection.cursor() as cursor:
+            cursor.execute(f"SELECT us.user_money "
+                           f"FROM Users AS us "
+                           f"WHERE us.user_chat_id = {user_chat_id}; ")
+
+            return cursor.fetchone()
+
+    def get_possible_items(self, user_balance: int) -> tuple:
+        with self.__connection.cursor() as cursor:
+            cursor.execute(f"SELECT st.item_name, st.item_price "
+                           f"FROM Store AS st "
+                           f"WHERE st.item_price <= {user_balance};")
+
+            return cursor.fetchall()
 
 
