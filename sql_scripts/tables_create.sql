@@ -51,6 +51,7 @@ CREATE TABLE IF NOT EXISTS Stat (
 
 
 CREATE TABLE IF NOT EXISTS Users (
+    user_avatar VARCHAR NOT NULL UNIQUE,
     user_name VARCHAR NOT NULL,
     user_chat_id BIGINT NOT NULL PRIMARY KEY,
     user_chapter_id CHAR(4) DEFAULT 'PC00',
@@ -64,7 +65,9 @@ CREATE TABLE IF NOT EXISTS Users (
     user_level INT DEFAULT 1,
     user_exp INT DEFAULT 0,
     user_status VARCHAR DEFAULT 'novice pythonist',
-    user_achievements INT[] DEFAULT ARRAY[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+    user_achievements INT[] DEFAULT ARRAY[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    user_money_rate REAL DEFAULT 1.0,
+    user_exp_rate READ DEFAULT 1.0
 );
 
 
