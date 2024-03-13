@@ -86,9 +86,6 @@ class PythonMummyBot:
             return
 
         @self.__bot.message_handler(commands=["store"])
-        def
-
-        @self.__bot.message_handler(commands=["store"])
         def get_store_data(message: telebot.types.Message) -> None:
             user_chat_id: int = message.from_user.id
             store_link: str = "https://disk.yandex.ru/i/gRVYI2aP60fTuw"
