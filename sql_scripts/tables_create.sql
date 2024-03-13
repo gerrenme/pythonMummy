@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS Courses (
-    chapter_id VARCHAR NOT NULL DEFAULT 'PC00',
-    chapter_text VARCHAR DEFAULT '../chapter/PC00',
+    chapter_id VARCHAR NOT NULL DEFAULT 'PC',
+    chapter_text VARCHAR DEFAULT ' ',
 	chapter_complexity VARCHAR DEFAULT 'easy' CHECK (chapter_complexity IN ('easy', 'medium', 'hard', 'extra')),
 	chapter_award INT DEFAULT 42,
     material_arrangement VARCHAR DEFAULT '../chapter/'
@@ -8,17 +8,20 @@ CREATE TABLE IF NOT EXISTS Courses (
 
 
 CREATE TABLE IF NOT EXISTS InterviewTasks (
-    task_id VARCHAR NOT NULL DEFAULT 'PIT00',
-    task_text VARCHAR DEFAULT '../interview_tasks/PT00',
+    task_id VARCHAR NOT NULL DEFAULT 'PIT',
+    task_text VARCHAR DEFAULT ' ',
+    task_answer_1 VARCHAR DEFAULT " ",
+    task_answer_2 VARCHAR DEFAULT " ",
+    task_answer_3 VARCHAR DEFAULT " ",
     task_complexity VARCHAR DEFAULT 'easy' CHECK (task_complexity IN ('easy', 'medium', 'hard', 'extra')),
-	task_award INT DEFAULT 21,
-    material_arrangement VARCHAR DEFAULT '../interview_tasks/'
+	task_money_award INT DEFAULT 21,
+	task_exp_award INT DEFAULT 21
 );
 
 
 CREATE TABLE IF NOT EXISTS Notebooks (
-    notebook_id VARCHAR NOT NULL DEFAULT 'PN00',
-    notebook_text VARCHAR DEFAULT '../notebooks/PN00',
+    notebook_id VARCHAR NOT NULL DEFAULT 'PN',
+    notebook_text VARCHAR DEFAULT ' ',
     notebook_complexity VARCHAR DEFAULT 'easy' CHECK (notebook_complexity IN ('easy', 'medium', 'hard', 'extra')),
     notebook_award INT DEFAULT 21,
     material_arrangement VARCHAR DEFAULT '../notebooks/'
@@ -54,9 +57,9 @@ CREATE TABLE IF NOT EXISTS Users (
     user_avatar VARCHAR NOT NULL UNIQUE,
     user_name VARCHAR NOT NULL,
     user_chat_id BIGINT NOT NULL PRIMARY KEY,
-    user_chapter_id CHAR(4) DEFAULT 'PC00',
-    user_task_id CHAR(5) DEFAULT 'PIT00',
-    user_notebook_id CHAR(4) DEFAULT 'PN00',
+    user_chapter_id CHAR(5) DEFAULT 'PC000',
+    user_task_id CHAR(6) DEFAULT 'PIT000',
+    user_notebook_id CHAR(5) DEFAULT 'PN000',
     user_money INT DEFAULT 21,
     user_consumables INT[] DEFAULT ARRAY[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
     user_total_tasks INT DEFAULT 0,
