@@ -1,3 +1,7 @@
+from random import choice
+from config import facts_about_python
+
+
 class MessageCreator:
     @staticmethod
     def create_progress_message(course: str, interview_task: str, notebook: str) -> str:
@@ -11,3 +15,9 @@ class MessageCreator:
 
     def create_leaderboard_list(self):
         pass
+
+    @staticmethod
+    def create_random_fact() -> str:
+        message: str = f"Интересный факт №{choice(facts_about_python)} Прикольно, правда?"
+
+        return message

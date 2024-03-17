@@ -7,6 +7,7 @@ from database_calls import DatabaseCaller
 from message_creator import MessageCreator
 from static_service import StaticSrvice
 from config import system_messages
+from logger import Logger
 
 from config import telebot_key
 
@@ -17,7 +18,9 @@ class PythonMummyBot:
         self.db_connect: DatabaseCaller = DatabaseCaller()
         self.message_creator: MessageCreator = MessageCreator()
         self.static_service: StaticSrvice = StaticSrvice()
-        schedule.every().second.do(self.test_print)
+        self.logger: Logger = Logger()
+
+        # schedule.every().second.do(self.test_print)
 
         @self.__bot.message_handler(commands=["start"])
         def send_start_message(message: telebot.types.Message) -> None:
@@ -101,6 +104,7 @@ class PythonMummyBot:
         @self.__bot.message_handler(commands=["top"])
         def get_leaderboard(message: telebot.types.Message) -> None:
             user_chat_id: int = message.from_user.id
+            user_name: str = message.from_user.username
             user_avatar: str = self.db_connect.get_user_avatar(user_chat_id=user_chat_id)[0]
 
             res: list = list(self.db_connect.get_top_users())
@@ -110,6 +114,7 @@ class PythonMummyBot:
                                       "\n\nДо окончания гонки осталось n дней")
 
             self.__bot.send_message(user_chat_id, text=top_users_message)
+            self.logger.log_see_top(user_chat_id=user_chat_id, user_name=user_name, user_avatar=user_avatar)
 
             if user_avatar in top_users_message:
                 self.__bot.send_message(user_chat_id, text=system_messages["grats_top_10"])
@@ -156,10 +161,12 @@ class PythonMummyBot:
         def add_suggestion(message: telebot.types.Message) -> None:
             user_chat_id: int = message.from_user.id
             user_avatar: str = self.db_connect.get_user_avatar(user_chat_id=user_chat_id)[0]
+            user_name: str = message.from_user.username
             user_suggestion: str = message.text.strip().lower()
 
             self.db_connect.add_suggestion(user_avatar=user_avatar, user_suggestion=user_suggestion)
             self.__bot.send_message(user_chat_id, text=system_messages["success_suggestion"])
+            self.logger.log_send_suggestion(user_chat_id=user_chat_id, user_name=user_name, user_avatar=user_avatar)
 
             return
 
@@ -172,6 +179,7 @@ class PythonMummyBot:
                 and not self.db_connect.check_avatar(user_avatar=user_avatar)):
             self.db_connect.add_user(user_chat_id=user_chat_id, user_name=user_name, user_avatar=user_avatar)
             self.__bot.send_message(user_chat_id, text=system_messages["grats_new_user"])
+            self.logger.log_user_add(user_chat_id=user_chat_id, user_name=user_name, user_avatar=user_avatar)
 
         else:
             self.__bot.send_message(user_chat_id, text=system_messages["wrong_name"])
@@ -181,6 +189,7 @@ class PythonMummyBot:
         print("cringe")
 
     def run(self) -> None:
+        self.logger.log_bot_restart()
         self.__bot.polling()
 
 
