@@ -24,17 +24,11 @@ class PythonMummyBot:
 
         @self.__bot.message_handler(commands=["start"])
         def send_start_message(message: telebot.types.Message) -> None:
-            markup: telebot.types.ReplyKeyboardMarkup = telebot.types.ReplyKeyboardMarkup(row_width=2,
+            markup: telebot.types.ReplyKeyboardMarkup = telebot.types.ReplyKeyboardMarkup(row_width=1,
                                                                                           resize_keyboard=True)
 
             btn_menu: telebot.types.KeyboardButton = telebot.types.KeyboardButton(text='/menu')
-            btn_shop: telebot.types.KeyboardButton = telebot.types.KeyboardButton(text='/store')
-            btn_leaderboard: telebot.types.KeyboardButton = telebot.types.KeyboardButton(text='/top')
-            btn_course: telebot.types.KeyboardButton = telebot.types.KeyboardButton(text='/course')
-            btn_interview: telebot.types.KeyboardButton = telebot.types.KeyboardButton(text='/interview_tasks')
-            btn_notebooks: telebot.types.KeyboardButton = telebot.types.KeyboardButton(text='/notebooks')
-
-            markup.add(btn_menu, btn_leaderboard, btn_shop, btn_course, btn_interview, btn_notebooks)
+            markup.add(btn_menu)
             user_chat_id: int = message.from_user.id
 
             is_user: bool = self.db_connect.check_user(user_chat_id=user_chat_id)
@@ -58,8 +52,11 @@ class PythonMummyBot:
             btn_notebooks: telebot.types.KeyboardButton = telebot.types.KeyboardButton(text='/notebooks')
             btn_interview: telebot.types.KeyboardButton = telebot.types.KeyboardButton(text='/interview_tasks')
             btn_leaderboard: telebot.types.KeyboardButton = telebot.types.KeyboardButton(text='/top')
+            btn_suggestion: telebot.types.KeyboardButton = telebot.types.KeyboardButton(text='/suggestion')
+            btn_info: telebot.types.KeyboardButton = telebot.types.KeyboardButton(text='/info')
 
-            markup.add(btn_start, btn_leaderboard, btn_shop, btn_course, btn_interview, btn_notebooks)
+            markup.add(btn_start, btn_leaderboard, btn_shop, btn_course, btn_interview, btn_notebooks,
+                       btn_suggestion, btn_info)
 
             self.__bot.send_message(user_chat_id, text=system_messages["menu_roadmap"], reply_markup=markup)
 
@@ -144,7 +141,7 @@ class PythonMummyBot:
 
             return
 
-        @self.__bot.message_handler(commands=["suggest"])
+        @self.__bot.message_handler(commands=["suggestion"])
         def create_suggestion(message: telebot.types.Message) -> None:
             user_chat_id: int = message.from_user.id
 

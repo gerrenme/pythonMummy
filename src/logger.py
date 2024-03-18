@@ -26,5 +26,18 @@ class Logger:
 
     @staticmethod
     def log_send_suggestion(user_chat_id: int, user_name: str, user_avatar: str) -> None:
-        logging.info(msg="Отправил Предложение user_chat_id: {user_chat_id}, user_name: {user_name}, user_avatar: "
+        logging.info(msg=f"Отправил Предложение user_chat_id: {user_chat_id}, user_name: {user_name}, user_avatar: "
                      f"{user_avatar}")
+
+    @staticmethod
+    def log_rm_error(filename: str, exception: Exception) -> None:
+        logging.error(msg=f"Ошибка Удаления Файла Из YADISK. Filename = {filename}. Exception - {exception}")
+
+    @staticmethod
+    def log_upload_error(dirr: str, filename: str, exception: Exception) -> None:
+        logging.error(msg=f"Ошибка Загрузки Файла В YADISK. Filename = {filename}; Dir = {dirr}. Exception - {exception}")
+
+    @staticmethod
+    def log_download_error(dirr: str, filename: str, exception: Exception) -> None:
+        logging.error(msg=f"Ошибка Скачивания Файла Из YADISK. Filename = {filename}; Dir = {dirr}. Exception - {exception}")
+
