@@ -1,9 +1,10 @@
 import yadisk
-from config import yadisk_token
-from logger import Logger
-import datetime
+from datetime import datetime
 import os
 import shutil
+
+from config import yadisk_token
+from logger import Logger
 
 
 class FilesUploader:
@@ -29,11 +30,20 @@ class FilesUploader:
 
     def download_file(self, filename: str, dirr: str) -> bool:
         try:
-            self.yd_connect.upload(f"{dirr}/{filename}", filename)
+            self.yd_connect.download(f"{dirr}/{filename}", filename)
             return True
 
         except Exception as _ex:
             self.logger.log_download_error(dirr=dirr, filename=filename, exception=_ex)
 
     def upload_logs(self, filename: str = "bot.log") -> None:
-        current_date = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        current_date: datetime.time = datetime.now().strftime("%Y-%m-%d")
+
+        try:
+            new_filename: str = f"logs_from{current_date}.log"
+            shutil.copy(filename, new_filename)
+            self.yd_connect.upload(new_filename, f"Logs/{new_filename}")
+            os.remove(new_filename)
+
+        except Exception as _ex:
+            self.logger.log_upload_error(dirr="Logs", filename=filename, exception=_ex)
