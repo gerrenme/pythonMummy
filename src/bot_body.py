@@ -6,7 +6,7 @@ import threading
 from database_calls import DatabaseCaller
 from message_creator import MessageCreator
 from static_service import StaticSrvice
-from config import system_messages
+from config import system_messages, bot_instruction, task_lib
 from logger import Logger
 
 from config import telebot_key
@@ -33,10 +33,10 @@ class PythonMummyBot:
 
             is_user: bool = self.db_connect.check_user(user_chat_id=user_chat_id)
             if is_user:
-                self.__bot.send_message(user_chat_id, text=system_messages["already_registered"],
+                self.__bot.send_message(chat_id=user_chat_id, text=system_messages["already_registered"],
                                         reply_markup=markup)
             else:
-                self.__bot.send_message(user_chat_id,
+                self.__bot.send_message(chat_id=user_chat_id,
                                         text=system_messages["name_rules"])
                 self.__bot.register_next_step_handler(message, self.add_user_avatar)
 
@@ -58,11 +58,13 @@ class PythonMummyBot:
             markup.add(btn_start, btn_leaderboard, btn_shop, btn_course, btn_interview, btn_notebooks,
                        btn_suggestion, btn_info)
 
-            self.__bot.send_message(user_chat_id, text=system_messages["menu_roadmap"], reply_markup=markup)
+            self.__bot.send_message(chat_id=user_chat_id, text=system_messages["menu_roadmap"], reply_markup=markup)
 
         @self.__bot.message_handler(commands=["info"])
         def show_info(message: telebot.types.Message) -> None:
-            pass
+            user_chat_id: int = message.from_user.id
+
+            self.__bot.send_message(chat_id=user_chat_id, text=bot_instruction)
 
         @self.__bot.message_handler(commands=["pic"])
         def send_pic(message: telebot.types.Message) -> None:
@@ -78,7 +80,7 @@ class PythonMummyBot:
                     photo.close()
 
                 if photos:
-                    self.__bot.send_media_group(user_chat_id, media=photos)
+                    self.__bot.send_media_group(chat_id=user_chat_id, media=photos)
                     print("sended")
             return
 
@@ -92,7 +94,7 @@ class PythonMummyBot:
                 "Notebook": res[2]
             }
 
-            self.__bot.send_message(user_chat_id, self.message_creator.create_progress_message(
+            self.__bot.send_message(chat_id=user_chat_id, text=self.message_creator.create_progress_message(
                 course=user_progress["Course"],
                 interview_task=user_progress["InterviewTask"],
                 notebook=user_progress["Notebook"]))
@@ -110,20 +112,20 @@ class PythonMummyBot:
             top_users_message: str = ("Представляем топ-10 пользователей PythonMummy:\n\n🎶" + "\n🎶".join(top_users) +
                                       "\n\nДо окончания гонки осталось n дней")
 
-            self.__bot.send_message(user_chat_id, text=top_users_message)
+            self.__bot.send_message(chat_id=user_chat_id, text=top_users_message)
             self.logger.log_see_top(user_chat_id=user_chat_id, user_name=user_name, user_avatar=user_avatar)
 
             if user_avatar in top_users_message:
-                self.__bot.send_message(user_chat_id, text=system_messages["grats_top_10"])
+                self.__bot.send_message(chat_id=user_chat_id, text=system_messages["grats_top_10"])
             else:
-                self.__bot.send_message(user_chat_id, text=system_messages["not_top_10"])
+                self.__bot.send_message(chat_id=user_chat_id, text=system_messages["not_top_10"])
             return
 
         @self.__bot.message_handler(commands=["store"])
         def get_store_data(message: telebot.types.Message) -> None:
             user_chat_id: int = message.from_user.id
             store_link: str = "https://disk.yandex.ru/i/gRVYI2aP60fTuw"
-            self.__bot.send_message(user_chat_id, text=system_messages["store_present"] + store_link)
+            self.__bot.send_message(chat_id=user_chat_id, text=system_messages["store_present"] + store_link)
 
             return
 
@@ -134,10 +136,22 @@ class PythonMummyBot:
             user_balance: int = int(self.db_connect.get_user_balance(user_chat_id=user_chat_id)[0])
             possible_items: tuple = self.db_connect.get_possible_items(user_balance=user_balance)
 
-            self.__bot.send_message(user_chat_id, text="Ниже приведен список вещей, которые ты можешь купить: \n\n● " +
+            self.__bot.send_message(chat_id=user_chat_id, text="Ниже приведен список вещей, которые ты можешь купить: \n\n● " +
                                                        "\n● ".join([f"{t[0]} — {t[1]} Gold" for t in possible_items])
                                     + f"\n\n Твой баланс {user_balance} Gold. "
                                       f"Введи название предмета, который хочешь купить")
+
+            return
+
+        @self.__bot.message_handler(commands=["interview_tasks"])
+        def get_interview_tasks(message: telebot.types.Message) -> None:
+            user_chat_id: int = message.from_user.id
+
+            user_interviews = self.db_connect.get_user_interviews(user_chat_id=user_chat_id)[0][0]
+            interview_list: str = self.message_creator.create_interview_list(interviews=user_interviews)
+            self.__bot.send_message(chat_id=user_chat_id, text=interview_list)
+
+            self.__bot.register_next_step_handler(message, choose_task)
 
             return
 
@@ -145,14 +159,14 @@ class PythonMummyBot:
         def create_suggestion(message: telebot.types.Message) -> None:
             user_chat_id: int = message.from_user.id
 
-            self.__bot.send_message(user_chat_id, text=system_messages["get_suggestion"])
+            self.__bot.send_message(chat_id=user_chat_id, text=system_messages["get_suggestion"])
             self.__bot.register_next_step_handler(message, add_suggestion)
 
             return
 
         @self.__bot.message_handler(content_types=["text"])
         def get_text_content(message: telebot.types.Message) -> None:
-            self.__bot.send_message(message.from_user.id, text=system_messages["cringe_text"])
+            self.__bot.send_message(chat_id=message.from_user.id, text=system_messages["cringe_text"])
             return
 
         def add_suggestion(message: telebot.types.Message) -> None:
@@ -162,24 +176,55 @@ class PythonMummyBot:
             user_suggestion: str = message.text.strip().lower()
 
             self.db_connect.add_suggestion(user_avatar=user_avatar, user_suggestion=user_suggestion)
-            self.__bot.send_message(user_chat_id, text=system_messages["success_suggestion"])
+            self.__bot.send_message(chat_id=user_chat_id, text=system_messages["success_suggestion"])
             self.logger.log_send_suggestion(user_chat_id=user_chat_id, user_name=user_name, user_avatar=user_avatar)
 
             return
+
+        def choose_task(message: telebot.types.Message) -> None:
+            user_chat_id: int = message.from_user.id
+            wanted_task: str = message.text
+            # user_interviews = self.db_connect.get_user_interviews(user_chat_id=user_chat_id)[0][0]
+
+            if wanted_task not in task_lib.keys():
+                self.__bot.send_message(chat_id=user_chat_id, text="Такой задачи не существует. "
+                                                                   "Повтори процедуру еще раз")
+
+                return
+
+            self.__bot.send_message(chat_id=user_chat_id, text=task_lib[wanted_task][0])
+            self.__bot.register_next_step_handler(message, check_answer_accuracy, wanted_task)
+
+            return
+
+        def check_answer_accuracy(message: telebot.types.Message, question: str) -> None:
+            user_chat_id: int = message.from_user.id
+            user_answer: str = message.text
+            correct_answers: tuple[str] = self.db_connect.get_correct_answers(task_id=question)
+
+            # проверка правильности
+            if user_answer == "admin":
+                self.__bot.send_message(chat_id=user_chat_id, text="Задача решена, ебать ты молодец")
+                self.
 
     def add_user_avatar(self, message: telebot.types.Message) -> None:
         user_avatar: str = message.text.strip()
         user_chat_id: int = message.from_user.id
         user_name: str = message.from_user.username
+        markup: telebot.types.ReplyKeyboardMarkup = telebot.types.ReplyKeyboardMarkup(row_width=1,
+                                                                                      resize_keyboard=True)
+
+        btn_menu: telebot.types.KeyboardButton = telebot.types.KeyboardButton(text='/menu')
+        markup.add(btn_menu)
 
         if (self.static_service.validate_name(name=user_avatar)
                 and not self.db_connect.check_avatar(user_avatar=user_avatar)):
             self.db_connect.add_user(user_chat_id=user_chat_id, user_name=user_name, user_avatar=user_avatar)
-            self.__bot.send_message(user_chat_id, text=system_messages["grats_new_user"])
+            self.__bot.send_message(chat_id=user_chat_id, text=system_messages["grats_new_user"], reply_markup=markup)
             self.logger.log_user_add(user_chat_id=user_chat_id, user_name=user_name, user_avatar=user_avatar)
 
         else:
-            self.__bot.send_message(user_chat_id, text=system_messages["wrong_name"])
+            self.__bot.send_message(chat_id=user_chat_id, text=system_messages["wrong_name"])
 
     @staticmethod
     def test_print() -> None:

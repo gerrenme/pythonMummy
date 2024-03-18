@@ -88,4 +88,26 @@ class DatabaseCaller:
 
             return cursor.fetchall()
 
+    def get_user_interviews(self, user_chat_id) -> tuple:
+        with self.__connection.cursor() as cursor:
+            cursor.execute(f"SELECT user_interview_tasks "
+                           f"FROM Users AS us "
+                           f"WHERE us.user_chat_id = {user_chat_id}; ")
 
+            return cursor.fetchall()
+
+    def get_correct_answers(self, task_id: str) -> tuple:
+        with self.__connection.cursor() as cursor:
+            cursor.execute(f"SELECT it.task_answer_1, it.task_answer_2, it.task_answer_3 "
+                           f"FROM InterviewTasks AS it "
+                           f"WHERE it.task_id = {task_id}; ")
+
+            return cursor.fetchall()
+
+    def update_interview_tasks(self, user_chat_id: int, task_id: str) -> None:
+        with self.__connection.cursor() as cursor:
+            cursor.execute(f"UPDATE Users "
+                           f"SET user_interview_tasks = jsonb_set(user_interview_tasks, '{PIT5}', '10'::jsonb)"
+                           f"WHERE id = 1;")
+
+            return

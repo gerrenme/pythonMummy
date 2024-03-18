@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS Users (
     user_name VARCHAR NOT NULL,
     user_chat_id BIGINT NOT NULL PRIMARY KEY,
     user_chapter_id CHAR(5) DEFAULT 'PC000',
-    user_task_id CHAR(6) DEFAULT 'PIT000',
+    user_interview_tasks JSONB DEFAULT '{"PIT1": 0, "PIT2": 0, "PIT3": 0, "PIT4": 0, "PIT5": 0, "PIT6": 0, "PIT7": 0, "PIT8": 0, "PIT9": 0, "PIT10": 0, "PIT11": 0, "PIT12": 0, "PIT13": 0, "PIT14": 0, "PIT15": 0, "PIT16": 0, "PIT17": 0, "PIT18": 0, "PIT19": 0, "PIT20": 0}',
     user_notebook_id CHAR(5) DEFAULT 'PN000',
     user_money INT DEFAULT 21,
     user_consumables INT[] DEFAULT ARRAY[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
@@ -70,7 +70,7 @@ CREATE TABLE IF NOT EXISTS Users (
     user_status VARCHAR DEFAULT 'novice pythonist',
     user_achievements INT[] DEFAULT ARRAY[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
     user_money_rate REAL DEFAULT 1.0,
-    user_exp_rate READ DEFAULT 1.0
+    user_exp_rate REAL DEFAULT 1.0
 );
 
 

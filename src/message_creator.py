@@ -1,5 +1,5 @@
 from random import choice
-from config import facts_about_python
+from config import facts_about_python, task_lib
 
 
 class MessageCreator:
@@ -21,3 +21,13 @@ class MessageCreator:
         message: str = f"Интересный факт №{choice(facts_about_python)} Прикольно, правда?"
 
         return message
+
+    @staticmethod
+    def create_interview_list(interviews: dict) -> str:
+        message: list[str] = ["Ниже приведен ваш список задач:\n\n"]
+        for name, val in interviews.items():
+            message.append(f"{'🟥' if val == 0 else '🟢'} {name} -- {task_lib[name][0]}. {task_lib[name][1]}")
+
+        message.append(f"Вы решили {round(sum(interviews.values()) / len(interviews))}% задач. Введите номер задачи, "
+                       f"которую хотите решить")
+        return "\n".join(message)
