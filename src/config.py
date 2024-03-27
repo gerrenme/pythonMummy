@@ -2,10 +2,10 @@ db_host: str = "127.0.0.1"
 db_user: str = "gerrenme"
 db_password: str = "1"
 db_name: str = "pythonMummy"
-yadisk_token: str = "y0_AgAAAAB05VWNAAt2ugAAAAD-pJIlAAA3JXv6HG1IV7CRg5QDI12bG2Kj4w"
+yadisk_token: str = "huy1"
 
 admin_password: str = "1"
-telebot_key: str = "6861912111:AAG1HmkE2cRhhpgNAAnAl4aLJNiP_7nWlLA"
+telebot_key: str = "huy2"
 
 system_messages: dict[str, str] = {"already_registered": "Ты уже зарегистрирован в PythonMummy. "
                                                          "Тебе уже доступны все привилегии нашего бота :)",
